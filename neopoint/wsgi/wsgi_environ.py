@@ -4,7 +4,8 @@ from dataclasses import dataclass
 
 from .wsgi_version import WsgiVersion
 from .exceptions import UnsupportedProtocol
-from ..http import RequestMethod, HttpVersion
+from ..http.http_version import HttpVersion
+from ..http.request_method import RequestMethod
 
 
 @dataclass(slots=True, frozen=True, match_args=False, init=False)
