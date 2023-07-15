@@ -25,7 +25,8 @@ classifiers = [
 keywords = ["web", "framework", "HTTP"]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<=3.11"
+python = ">=3.10,<3.12"
+pytest-randomly = "^3.13.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -39,6 +40,7 @@ pytest = "^7.4.0"
 commitizen = "^3.5.2"
 pre-commit = "^3.3.3"
 pytest-cov = "^4.1.0"
+gunicorn = "^20.1.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -56,6 +58,7 @@ disable = [
     "redefined-outer-name",
     "useless-return",
     "W0511",
+    "C0103",
 ]
 
 [tool.ruff]
