@@ -8,3 +8,8 @@ class RequestMethod(str, Enum):
     POST = "POST"
     PUT = "PUT"
     DELETE = "DELETE"
+    HEAD = "HEAD"
+    CONNECT = "CONNECT"
+    OPTIONS = "OPTIONS"
+    TRACE = "TRACE"
+    PATCH = "PATCH"

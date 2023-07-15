@@ -24,6 +24,8 @@ class App:
             wsgi_environ = WsgiEnviron(environ)
         except UnsupportedProtocol:
             yield f"Protocol {environ['wsgi.url_schema']} does not supported.".encode("utf-8")
+        except AttributeError as e:
+            yield f"{e}".encode("utf-8")
 
         request = Request(wsgi_environ)
 
@@ -32,5 +34,4 @@ class App:
 
     def run(self, host: str, port: int) -> None:
         with make_server(host, port, self) as httpd:
-            print(f"[LOG] Start at {port} port.")
             httpd.serve_forever()

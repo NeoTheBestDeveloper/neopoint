@@ -1,6 +1,7 @@
 from io import StringIO
 from typing import Any, Literal
 from dataclasses import dataclass
+from wsgiref.util import FileWrapper
 
 from .wsgi_version import WsgiVersion
 from .exceptions import UnsupportedProtocol
@@ -17,6 +18,8 @@ class WsgiEnviron:
     wsgi_multithread: bool
     wsgi_multiprocess: bool
     wsgi_run_once: bool
+    wsgi_file_wrapper: FileWrapper | None
+    wsgi_input_terminated: bool
 
     request_method: RequestMethod
     script_name: str
@@ -32,16 +35,19 @@ class WsgiEnviron:
 
     def __init__(self, environ: dict[str, Any]) -> None:
         # WSGI keys.
-        object.__setattr__(self, "wsgi_url_scheme", environ["wsgi.url_scheme"])
-        if self.wsgi_url_scheme not in ("http", "https"):
-            raise UnsupportedProtocol(f"Protocol '{self.wsgi_url_scheme}' does not supported.")
 
         object.__setattr__(self, "wsgi_version", WsgiVersion(*environ["wsgi.version"]))
+        object.__setattr__(self, "wsgi_url_scheme", environ["wsgi.url_scheme"])
         object.__setattr__(self, "wsgi_input", environ["wsgi.input"])
         object.__setattr__(self, "wsgi_errors", environ["wsgi.errors"])
-        object.__setattr__(self, "wsgi_multithread", environ["wsgi.multithread"])
-        object.__setattr__(self, "wsgi_multiprocess", environ["wsgi.multiprocess"])
-        object.__setattr__(self, "wsgi_run_once", environ["wsgi.run_once"])
+        object.__setattr__(self, "wsgi_multithread", bool(environ["wsgi.multithread"]))
+        object.__setattr__(self, "wsgi_multiprocess", bool(environ["wsgi.multiprocess"]))
+        object.__setattr__(self, "wsgi_run_once", bool(environ["wsgi.run_once"]))
+        object.__setattr__(self, "wsgi_file_wrapper", environ.get("wsgi.file_wrapper", None))
+        object.__setattr__(self, "wsgi_input_terminated", bool(environ.get("wsgi.input_terminated", False)))
+
+        if self.wsgi_url_scheme not in ("http", "https"):
+            raise UnsupportedProtocol(f"Protocol '{self.wsgi_url_scheme}' does not supported.")
 
         # CGI keys.
         object.__setattr__(self, "request_method", RequestMethod(environ["REQUEST_METHOD"]))
