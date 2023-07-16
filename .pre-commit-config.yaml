@@ -16,5 +16,4 @@ repos:
       name: checks
       entry: ./scripts/checks.sh
       language: system
-      types: [python3]
       stages: [commit-msg]
