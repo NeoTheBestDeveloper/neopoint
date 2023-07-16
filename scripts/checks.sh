@@ -11,7 +11,7 @@ echo -e "\n\n"
 echo '#################################'
 echo '######## CHECK FORMATING ########'
 echo '#################################'
-isort --check-only neopoint tests
+isort --check-only --profile black neopoint tests
 black --check neopoint tests
 echo -e "\n\n"
 

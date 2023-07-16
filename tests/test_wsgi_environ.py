@@ -1,13 +1,13 @@
-from typing import Any
 from dataclasses import astuple
+from typing import Any
 from wsgiref.util import setup_testing_defaults
 
 import pytest
 
+from neopoint.http.request_method import RequestMethod
 from neopoint.wsgi import WsgiEnviron
 from neopoint.wsgi.exceptions import UnsupportedProtocol
 from neopoint.wsgi.wsgi_version import WsgiVersion
-from neopoint.http.request_method import RequestMethod
 
 
 @pytest.fixture

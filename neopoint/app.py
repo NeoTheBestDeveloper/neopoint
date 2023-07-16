@@ -18,19 +18,19 @@ class App:
 
     def __call__(self, environ: dict[str, Any], start_response: StartResponse) -> Iterable[bytes]:
         status = "200 OK"
-        headers = [("Content-type", "text/plain; charset=utf-8")]
+        headers = [(str("Content-type"), str("text/plain; charset=utf-8"))]
 
         try:
             wsgi_environ = WsgiEnviron(environ)
         except UnsupportedProtocol:
-            yield f"Protocol {environ['wsgi.url_schema']} does not supported.".encode("utf-8")
+            return [f"Protocol {environ['wsgi.url_schema']} does not supported.".encode("utf-8")]
         except AttributeError as e:
-            yield f"{e}".encode("utf-8")
+            return [f"{e}".encode("utf-8")]
 
-        request = Request(wsgi_environ)
+        Request(wsgi_environ)
 
         start_response(status, headers)
-        yield "aboba".encode("utf-8")
+        return ["aboba".encode("utf-8")]
 
     def run(self, host: str, port: int) -> None:
         with make_server(host, port, self) as httpd:

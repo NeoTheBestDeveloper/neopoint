@@ -11,7 +11,7 @@ def test_app_run() -> None:
     server_process = Process(target=app.run, args=["localhost", 8080])
     server_process.start()
 
-    res = requests.get("http://localhost:8080")
+    res = requests.get("http://localhost:8080", timeout=5)
 
     assert res.status_code == 200
     assert res.text == "aboba"

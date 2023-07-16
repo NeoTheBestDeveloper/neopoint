@@ -9,6 +9,7 @@ from .exceptions import UnsupportedProtocol
 from .wsgi_version import WsgiVersion
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass(slots=True, frozen=True, match_args=False, init=False)
 class WsgiEnviron:
     wsgi_version: WsgiVersion
