@@ -1,7 +1,6 @@
-__all__ = ("Version",)
-
-
 from dataclasses import dataclass
+
+__all__ = ("Version",)
 
 
 @dataclass(frozen=True, slots=True)

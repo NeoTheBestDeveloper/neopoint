@@ -1,9 +1,9 @@
 from typing import Any, Final, Iterable
-from wsgiref.types import StartResponse
 from wsgiref.simple_server import make_server
+from wsgiref.types import StartResponse
 
 from .http import Request
-from .wsgi import WsgiEnviron, UnsupportedProtocol
+from .wsgi import UnsupportedProtocol, WsgiEnviron
 
 __all__ = ("App",)
 

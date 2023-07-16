@@ -1,12 +1,12 @@
+from dataclasses import dataclass
 from io import StringIO
 from typing import Any, Literal
-from dataclasses import dataclass
 from wsgiref.util import FileWrapper
 
-from .wsgi_version import WsgiVersion
-from .exceptions import UnsupportedProtocol
 from ..http.http_version import HttpVersion
 from ..http.request_method import RequestMethod
+from .exceptions import UnsupportedProtocol
+from .wsgi_version import WsgiVersion
 
 
 @dataclass(slots=True, frozen=True, match_args=False, init=False)

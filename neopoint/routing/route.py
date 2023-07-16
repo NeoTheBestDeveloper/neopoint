@@ -1,9 +1,8 @@
-__all__ = ("Route",)
-
-
 from typing import Any, Callable, TypeAlias
 
 from ..http import RequestMethod
+
+__all__ = ("Route",)
 
 EndpointType: TypeAlias = Callable[[Any], bytes]
 

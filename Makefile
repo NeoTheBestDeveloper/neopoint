@@ -4,4 +4,7 @@ clean:
 	rm -rf dist
 
 test:
-	pytest -cov  --cov=neopoint -sv tests
+	./scripts/test.sh
+
+checks:
+	./scripts/checks.sh
