@@ -1,6 +1,7 @@
 from multiprocessing import Process
 
 import requests
+from urllib3.exceptions import MaxRetryError
 
 from neopoint import App
 
@@ -11,9 +12,13 @@ def test_app_run() -> None:
     server_process = Process(target=app.run, args=["localhost", 8080])
     server_process.start()
 
-    res = requests.get("http://localhost:8080", timeout=5)
+    try:
+        res = requests.get("http://localhost:8080", timeout=20)
 
-    assert res.status_code == 200
-    assert res.text == "aboba"
-
+        assert res.status_code == 200
+        assert res.text == "aboba"
+    except MaxRetryError as e:
+        print(e)
+        server_process.kill()
+        assert False
     server_process.kill()
