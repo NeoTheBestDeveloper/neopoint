@@ -64,3 +64,19 @@ jobs:
 
       - name: Run tests with tox
         run: tox r -e python3.10,python3.11
+
+  check:
+    if: always()
+
+    needs:
+    - lint 
+    - types 
+    - tests
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Decide whether the needed jobs succeeded or failed
+      uses: re-actors/alls-green@release/v1
+      with:
+        jobs: ${{ toJSON(needs) }}
