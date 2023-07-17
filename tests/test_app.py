@@ -1,3 +1,4 @@
+import time
 from multiprocessing import Process
 
 import requests
@@ -12,6 +13,7 @@ def test_app_run() -> None:
 
     server_process = Process(target=app.run, args=["localhost", 8080])
     server_process.start()
+    time.sleep(5)
 
     try:
         res = requests.get("http://localhost:8080", timeout=20)
