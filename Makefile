@@ -4,7 +4,7 @@ clean:
 	rm -rf dist
 
 test:
-	./scripts/test.sh
+	tox r -e python3.10,python3.11
 
 checks:
-	./scripts/checks.sh
+	tox r -e lint,types

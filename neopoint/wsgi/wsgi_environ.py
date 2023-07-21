@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from io import StringIO
+from io import BufferedReader
 from typing import Any, Literal
 from wsgiref.util import FileWrapper
 
@@ -14,8 +14,8 @@ from .wsgi_version import WsgiVersion
 class WsgiEnviron:
     wsgi_version: WsgiVersion
     wsgi_url_scheme: Literal["http"] | Literal["https"]
-    wsgi_input: StringIO
-    wsgi_errors: StringIO
+    wsgi_input: BufferedReader
+    wsgi_errors: BufferedReader
     wsgi_multithread: bool
     wsgi_multiprocess: bool
     wsgi_run_once: bool
@@ -56,7 +56,7 @@ class WsgiEnviron:
         object.__setattr__(self, "path_info", environ["PATH_INFO"])
         object.__setattr__(self, "query_string", environ.get("QUERY_STRING", ""))
         object.__setattr__(self, "content_type", environ.get("CONTENT_TYPE", ""))
-        object.__setattr__(self, "content_length", environ.get("CONTENT_LENGTH", 0))
+        object.__setattr__(self, "content_length", int(environ.get("CONTENT_LENGTH", 0) or 0))
         object.__setattr__(self, "server_name", environ["SERVER_NAME"])
         object.__setattr__(self, "server_port", int(environ["SERVER_PORT"]))
         object.__setattr__(self, "http_version", HttpVersion(environ["SERVER_PROTOCOL"]))
