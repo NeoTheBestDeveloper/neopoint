@@ -36,6 +36,9 @@ class TestClient:
     def get(self, url_part: str, timeout: float = 2.0) -> requests.Response:
         return requests.get(self._get_full_url(url_part), timeout=timeout)
 
+    def post(self, url_part: str, json: dict | None = None, timeout: float = 2.0) -> requests.Response:
+        return requests.post(self._get_full_url(url_part), json=json, timeout=timeout)
+
     def kill(self) -> None:
         self._app_process.kill()
 

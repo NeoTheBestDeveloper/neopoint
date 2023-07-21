@@ -1,4 +1,4 @@
-from sys import stderr
+import traceback
 from typing import Any, Final, Iterable
 from wsgiref.simple_server import make_server
 from wsgiref.types import StartResponse
@@ -6,7 +6,7 @@ from wsgiref.types import StartResponse
 from neopoint.routing.route import Route
 
 from .http import Request
-from .wsgi import UnsupportedProtocol, WsgiEnviron
+from .wsgi import WsgiEnviron
 
 __all__ = ("App",)
 
@@ -24,17 +24,16 @@ class App:
     def __call__(self, environ: dict[str, Any], start_response: StartResponse) -> Iterable[bytes]:
         status = "200 OK"
         headers = [(str("Content-type"), str("text/plain; charset=utf-8"))]
-        print(environ, file=stderr)
 
         try:
             wsgi_environ = WsgiEnviron(environ)
-        except UnsupportedProtocol:
-            return [f"Protocol {environ['wsgi.url_schema']} does not supported.".encode("utf-8")]
-        except AttributeError as e:
-            return [f"{e}".encode("utf-8")]
-
-        request = Request(wsgi_environ)
-        response = self._root_route.dispatch_request(request)
+            request = Request(wsgi_environ)
+            response = self._root_route.dispatch_request(request)
+        # pylint: disable=broad-exception-caught
+        except Exception:
+            status = "500 Internal Server Error"
+            headers = [(str("Content-type"), str("text/plain; charset=utf-8"))]
+            response = str(traceback.format_exc()).encode("utf-8") if self._debug else b""
 
         start_response(status, headers)
         return [response]
