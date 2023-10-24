@@ -1,49 +1,106 @@
-from multiprocessing import Process
-from typing import Self
+import json
+from io import BytesIO
+from sys import stderr
+from typing import Any, Callable, NoReturn
+from wsgiref.types import WSGIApplication, WSGIEnvironment
 
-import requests
+from neopoint.http.http_method import HttpMethod
 
-from ..app import App
+from .test_response import TestResponse
 
 
 class TestClient:
     __test__ = False  # For pytest.
 
-    _app: App
-    _app_process: Process
-    _url: str
-    _port: int
+    _app: WSGIApplication
+    _default_environ: WSGIEnvironment
 
-    def __init__(self, wsgi_app: App, url: str = "localhost", port: int = 8080) -> None:
-        self._app = wsgi_app
-        self._url = url
-        self._port = port
-        self._app_process = Process(target=self._app.run, args=[url, port])
-        self._app_process.start()
+    def __init__(self, app: WSGIApplication, server_name: str = "localhost", port: int = 80) -> None:
+        self._app = app
 
-        server_started = False
+        self._default_environ = {
+            "REQUEST_METHOD": None,
+            "SCRIPT_NAME": "",
+            "PATH_INFO": "",
+            "QUERY_STRING": "",
+            "CONTENT_TYPE": "",
+            "CONTENT_LENGTH": "",
+            "SERVER_NAME": server_name,
+            "SERVER_PORT": port,
+            "SERVER_PROTOCOL": "HTTP/1.1",
+            "wsgi.version": (1, 0),
+            "wsgi.url_scheme": "http",
+            "wsgi.input": BytesIO(),
+            "wsgi.errors": stderr,
+            "wsgi.multithread": False,
+            "wsgi.multiprocess": False,
+            "wsgi.run_once": False,
+        }
 
-        while not server_started:
-            try:
-                requests.get(f"http://{url}:{port}", timeout=1)
-                server_started = True
-            except requests.exceptions.ConnectionError:
-                ...
+    def _make_current_environ(self, path: str, method: HttpMethod, json_payload: bytes = b"") -> WSGIEnvironment:
+        environ = self._default_environ.copy()
 
-    def _get_full_url(self, url_part: str) -> str:
-        return f"http://{self._url}:{self._port}{url_part}"
+        if json_payload:
+            environ["CONTENT_LENGTH"] = str(len(json_payload))
+            environ["CONTENT_TYPE"] = "application/json"
+        environ["wsgi.input"] = BytesIO(json_payload)
 
-    def get(self, url_part: str, timeout: float = 2.0) -> requests.Response:
-        return requests.get(self._get_full_url(url_part), timeout=timeout)
+        if "?" in path:
+            environ["PATH_INFO"], environ["QUERY_STRING"] = path.split("?")
+        else:
+            environ["PATH_INFO"] = path
 
-    def post(self, url_part: str, json: dict | None = None, timeout: float = 2.0) -> requests.Response:
-        return requests.post(self._get_full_url(url_part), json=json, timeout=timeout)
+        environ["REQUEST_METHOD"] = str(method)
 
-    def kill(self) -> None:
-        self._app_process.kill()
+        return environ
 
-    def __enter__(self) -> Self:
-        return self
+    def _handle_request(self, environ: WSGIEnvironment) -> TestResponse | NoReturn:
+        status_code: int | None = None
+        response_headers = None
+        exc_info = None
 
-    def __exit__(self, *_) -> None:
-        self.kill()
+        def start_response(
+            status_: str,
+            response_headers_: list[tuple[str, str]],
+            exc_info_: Any | None = None,
+        ) -> Callable[[bytes], Any]:
+            nonlocal status_code, response_headers, exc_info
+            status_code = int(status_.split()[0])
+            response_headers = response_headers_
+            exc_info = exc_info_
+            return lambda _: None
+
+        content_by_parts = self._app(environ, start_response)
+        content = b"".join(content_by_parts)
+
+        assert status_code is not None
+        assert response_headers is not None
+
+        return TestResponse(
+            status_code=status_code,
+            content=content,
+            headers=dict(response_headers),
+        )
+
+    def _json_to_bytes(self, json_payload: dict[str, Any]) -> bytes:
+        return json.dumps(json_payload).encode()
+
+    def get(self, path: str) -> TestResponse:
+        current_environ = self._make_current_environ(path, HttpMethod.GET)
+        return self._handle_request(current_environ)
+
+    def post(self, path: str, json_payload: dict[str, Any]) -> TestResponse:
+        bin_content = self._json_to_bytes(json_payload)
+        current_environ = self._make_current_environ(path, HttpMethod.POST, bin_content)
+
+        return self._handle_request(current_environ)
+
+    def put(self, path: str, json_payload: dict[str, Any]) -> TestResponse:
+        bin_content = self._json_to_bytes(json_payload)
+        current_environ = self._make_current_environ(path, HttpMethod.PUT, bin_content)
+
+        return self._handle_request(current_environ)
+
+    def delete(self, path: str) -> TestResponse:
+        current_environ = self._make_current_environ(path, HttpMethod.DELETE)
+        return self._handle_request(current_environ)

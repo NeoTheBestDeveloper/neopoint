@@ -1,11 +1,11 @@
 from typing import Any
 
 from neopoint.http.request import Request
-from neopoint.wsgi.wsgi_environ import WsgiEnviron
+from neopoint.wsgi.wsgi_environ import WSGIEnviron
 
 
 def test_default_request(default_environ: dict[str, Any]):
-    wsgi_environ = WsgiEnviron(default_environ)
+    wsgi_environ = WSGIEnviron(default_environ)
     req = Request(wsgi_environ)
     assert req.content_length == wsgi_environ.content_length
     assert req.content_type == wsgi_environ.content_type

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Iterator, Self, TypeAlias
+from typing import Any, Callable, Iterator, NoReturn, Self, TypeAlias
 
 from ..http import Request, RequestMethod
 
@@ -25,15 +25,20 @@ class Route:
             assert not path.endswith("/"), "A path must not end with '/', as the routes will start with '/'"
 
         def decorator(endpoint: EndpointCallable) -> None:
-            if self._urls.get(path) is None:
-                self._urls[self._prefix + path] = {method: endpoint}
+            full_path = self._get_full_path(path)
+
+            if self._urls.get(full_path) is None:
+                self._urls[full_path] = {method: endpoint}
             else:
-                self._urls[self._prefix + path][method] = endpoint
+                self._urls[full_path][method] = endpoint
 
         return decorator
 
+    def _get_full_path(self, path_part: str) -> str:
+        return f"{self._prefix}{path_part}"
+
     def __iter__(self) -> Iterator[tuple[str, dict[RequestMethod, EndpointCallable]]]:
-        return iter(self._urls.items())
+        return RouteIterator(self)
 
     def get(self, path: str, *_) -> Callable[[EndpointCallable], None]:
         return self._append_endpoint(path, RequestMethod.GET)
@@ -49,8 +54,8 @@ class Route:
 
     def include_route(self, route: Self) -> None:
         for url_part, endpoints in route:
-            url = f"{self._prefix}{url_part}"
-            self._urls[url] = endpoints
+            full_path = self._get_full_path(url_part)
+            self._urls[full_path] = endpoints
 
     def dispatch_request(self, req: Request) -> bytes:
         if self._urls.get(req.path) is None:
@@ -59,3 +64,24 @@ class Route:
             return b"This method is allowed."
 
         return self._urls[req.path][req.method](req)
+
+
+class RouteIterator(Iterator):
+    _urls: tuple[tuple[str, dict[RequestMethod, EndpointCallable]], ...]
+    _index: int
+
+    def __init__(self, route: Route) -> None:
+        self._urls = tuple(route._urls.items())
+        self._index = 0
+
+    def __iter__(self) -> Self:
+        return self
+
+    def __next__(self) -> tuple[str, dict[RequestMethod, EndpointCallable]] | NoReturn:
+        try:
+            url = self._urls[self._index]
+        except IndexError as e:
+            raise StopIteration from e
+
+        self._index += 1
+        return url

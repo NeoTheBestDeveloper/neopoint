@@ -71,6 +71,7 @@ disable = [
     "useless-return",
     "W0511",
     "C0103",
+    "R0801",
 ]
 
 [tool.ruff]

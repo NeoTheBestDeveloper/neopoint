@@ -3,7 +3,7 @@ from functools import cached_property
 from types import MappingProxyType
 from typing import Any
 
-from ..wsgi import WsgiEnviron
+from ..wsgi import WSGIEnviron
 from .request_method import RequestMethod
 
 __all__ = ("Request",)
@@ -21,8 +21,8 @@ class Request:
     _path: str
     _content: bytes
 
-    def __init__(self, wsgi_environ: WsgiEnviron) -> None:
-        self._header = wsgi_environ.http_header.items().mapping
+    def __init__(self, wsgi_environ: WSGIEnviron) -> None:
+        self._header = MappingProxyType(wsgi_environ.http_header)
         self._method = wsgi_environ.request_method
         self._content_type = wsgi_environ.content_type
         self._content_length = wsgi_environ.content_length

@@ -5,7 +5,7 @@ from wsgiref.util import setup_testing_defaults
 import pytest
 
 from neopoint.http.request_method import RequestMethod
-from neopoint.wsgi import WsgiEnviron
+from neopoint.wsgi import WSGIEnviron
 from neopoint.wsgi.exceptions import UnsupportedProtocol
 from neopoint.wsgi.wsgi_version import WsgiVersion
 
@@ -18,7 +18,7 @@ def default_environ() -> dict[str, Any]:
 
 
 def test_default_wsgi_environ(default_environ: dict[str, Any]) -> None:
-    wsgi_environ = WsgiEnviron(default_environ)
+    wsgi_environ = WSGIEnviron(default_environ)
     assert wsgi_environ.wsgi_version == WsgiVersion(1, 0)
     assert wsgi_environ.wsgi_url_scheme == "http"
     assert wsgi_environ.wsgi_input.read() == b""
@@ -43,4 +43,4 @@ def test_invalid_protocal_for_wsgi_environ(default_environ: dict[str, Any]) -> N
     default_environ["wsgi.url_scheme"] = "ftp"
 
     with pytest.raises(UnsupportedProtocol):
-        WsgiEnviron(default_environ)
+        WSGIEnviron(default_environ)

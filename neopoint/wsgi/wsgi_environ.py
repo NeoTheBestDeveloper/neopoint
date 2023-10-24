@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from io import BufferedReader
-from typing import Any, Literal
+from typing import Literal
+from wsgiref.types import WSGIEnvironment
 from wsgiref.util import FileWrapper
 
 from ..http.http_version import HttpVersion
@@ -8,10 +9,14 @@ from ..http.request_method import RequestMethod
 from .exceptions import UnsupportedProtocol
 from .wsgi_version import WsgiVersion
 
+__all__ = [
+    "WSGIEnviron",
+]
+
 
 # pylint: disable=too-many-instance-attributes
 @dataclass(slots=True, frozen=True, match_args=False, init=False)
-class WsgiEnviron:
+class WSGIEnviron:
     wsgi_version: WsgiVersion
     wsgi_url_scheme: Literal["http"] | Literal["https"]
     wsgi_input: BufferedReader
@@ -34,9 +39,8 @@ class WsgiEnviron:
 
     http_header: dict[str, str]
 
-    def __init__(self, environ: dict[str, Any]) -> None:
+    def __init__(self, environ: WSGIEnvironment) -> None:
         # WSGI keys.
-
         object.__setattr__(self, "wsgi_version", WsgiVersion(*environ["wsgi.version"]))
         object.__setattr__(self, "wsgi_url_scheme", environ["wsgi.url_scheme"])
         object.__setattr__(self, "wsgi_input", environ["wsgi.input"])

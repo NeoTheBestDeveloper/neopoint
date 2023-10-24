@@ -29,12 +29,11 @@ def app() -> App:
 
 @pytest.fixture
 def client(app: App) -> Generator[TestClient, None, None]:
-    with TestClient(app) as client:
-        yield client
+    yield TestClient(app)
 
 
 def test_app_run(client: TestClient) -> None:
-    req = client.get("/api/")
+    req = client.get("/api/?data=1&filter=category")
     assert req.status_code == 200
     assert req.content == b"Cool result."
 

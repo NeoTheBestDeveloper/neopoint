@@ -1,4 +1,7 @@
 from .exceptions import UnsupportedProtocol
-from .wsgi_environ import WsgiEnviron
+from .wsgi_environ import WSGIEnviron
 
-__all__ = ("WsgiEnviron", "UnsupportedProtocol")
+__all__ = (
+    "WSGIEnviron",
+    "UnsupportedProtocol",
+)
