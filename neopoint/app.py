@@ -2,10 +2,7 @@ from typing import Final, Iterable
 from wsgiref.simple_server import make_server
 from wsgiref.types import StartResponse, WSGIEnvironment
 
-from neopoint.http.http_status import HttpStatus
-from neopoint.http.response import Response
-
-from .http import Request
+from .http import HttpStatus, Request, Response
 from .routing import Route
 from .wsgi import WSGIEnviron
 
