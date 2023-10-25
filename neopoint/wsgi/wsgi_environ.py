@@ -7,7 +7,7 @@ from wsgiref.util import FileWrapper
 from ..http.http_version import HttpVersion
 from ..http.request_method import RequestMethod
 from .exceptions import UnsupportedProtocol
-from .wsgi_version import WsgiVersion
+from .wsgi_version import WSGIVersion
 
 __all__ = [
     "WSGIEnviron",
@@ -17,7 +17,7 @@ __all__ = [
 # pylint: disable=too-many-instance-attributes
 @dataclass(slots=True, frozen=True, match_args=False, init=False)
 class WSGIEnviron:
-    wsgi_version: WsgiVersion
+    wsgi_version: WSGIVersion
     wsgi_url_scheme: Literal["http"] | Literal["https"]
     wsgi_input: BufferedReader
     wsgi_errors: BufferedReader
@@ -41,7 +41,7 @@ class WSGIEnviron:
 
     def __init__(self, environ: WSGIEnvironment) -> None:
         # WSGI keys.
-        object.__setattr__(self, "wsgi_version", WsgiVersion(*environ["wsgi.version"]))
+        object.__setattr__(self, "wsgi_version", WSGIVersion(*environ["wsgi.version"]))
         object.__setattr__(self, "wsgi_url_scheme", environ["wsgi.url_scheme"])
         object.__setattr__(self, "wsgi_input", environ["wsgi.input"])
         object.__setattr__(self, "wsgi_errors", environ["wsgi.errors"])

@@ -1,4 +1,5 @@
 from .http_method import HttpMethod
+from .http_status import HttpStatus
 from .http_version import HttpVersion, InvalidHttpVersionError
 from .request import Request
 from .request_method import RequestMethod
@@ -11,4 +12,5 @@ __all__ = [
     "HttpVersion",
     "InvalidHttpVersionError",
     "HttpMethod",
+    "HttpStatus",
 ]

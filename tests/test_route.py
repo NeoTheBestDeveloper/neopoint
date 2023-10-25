@@ -2,8 +2,10 @@ from typing import Any
 
 import pytest
 
+from neopoint.http.http_status import HttpStatus
 from neopoint.http.request import Request
 from neopoint.http.request_method import RequestMethod
+from neopoint.http.response import Response
 from neopoint.routing import Route
 from neopoint.wsgi.wsgi_environ import WSGIEnviron
 
@@ -18,48 +20,48 @@ def test_adding_endpoint_get():
     route = Route()
 
     @route.get("/theme")
-    def endpoint(*_: Request) -> bytes:
-        return b"aboba"
+    def endpoint(*_: Request) -> Response:
+        return Response(HttpStatus.HTTP_200_OK, b"aboba", "text/plain; charset=utf-8")
 
     # pylint: disable=protected-access
     assert route._urls.get("/theme", None) is not None
-    assert route._urls["/theme"][RequestMethod.GET](None) == b"aboba"
+    assert route._urls["/theme"][RequestMethod.GET](None).payload == b"aboba"
 
 
 def test_adding_endpoint_post():
     route = Route()
 
     @route.post("/theme")
-    def endpoint(*_: Request) -> bytes:
-        return b"aboba"
+    def endpoint(*_: Request) -> Response:
+        return Response(HttpStatus.HTTP_200_OK, b"aboba", "text/plain; charset=utf-8")
 
     # pylint: disable=protected-access
     assert route._urls.get("/theme", None) is not None
-    assert route._urls["/theme"][RequestMethod.POST](None) == b"aboba"
+    assert route._urls["/theme"][RequestMethod.POST](None).payload == b"aboba"
 
 
 def test_adding_endpoint_put():
     route = Route()
 
     @route.put("/theme")
-    def endpoint(*_: Request) -> bytes:
-        return b"aboba"
+    def endpoint(*_: Request) -> Response:
+        return Response(HttpStatus.HTTP_200_OK, b"aboba", "text/plain; charset=utf-8")
 
     # pylint: disable=protected-access
     assert route._urls.get("/theme", None) is not None
-    assert route._urls["/theme"][RequestMethod.PUT](None) == b"aboba"
+    assert route._urls["/theme"][RequestMethod.PUT](None).payload == b"aboba"
 
 
 def test_adding_endpoint_delete():
     route = Route()
 
     @route.delete("/theme")
-    def endpoint(*_: Request) -> bytes:
-        return b"aboba"
+    def endpoint(*_: Request) -> Response:
+        return Response(HttpStatus.HTTP_200_OK, b"aboba", "text/plain; charset=utf-8")
 
     # pylint: disable=protected-access
     assert route._urls.get("/theme", None) is not None
-    assert route._urls["/theme"][RequestMethod.DELETE](None) == b"aboba"
+    assert route._urls["/theme"][RequestMethod.DELETE](None).payload == b"aboba"
 
 
 def test_route_include():
@@ -68,30 +70,30 @@ def test_route_include():
     theme_route = Route()
 
     @theme_route.get("/theme")
-    def endpoint1(*_: Request) -> bytes:
-        return b"aboba get"
+    def endpoint1(*_: Request) -> Response:
+        return Response(HttpStatus.HTTP_200_OK, b"aboba get", "text/plain; charset=utf-8")
 
     @theme_route.delete("/theme")
-    def endpoint2(*_: Request) -> bytes:
-        return b"aboba delete"
+    def endpoint2(*_: Request) -> Response:
+        return Response(HttpStatus.HTTP_200_OK, b"aboba delete", "text/plain; charset=utf-8")
 
     root_route.include_route(theme_route)
 
     # pylint: disable=protected-access
     assert root_route._urls.get("/api/theme", None) is not None
-    assert root_route._urls["/api/theme"][RequestMethod.DELETE](None) == b"aboba delete"
+    assert root_route._urls["/api/theme"][RequestMethod.DELETE](None).payload == b"aboba delete"
 
     # pylint: disable=protected-access
     assert root_route._urls.get("/api/theme", None) is not None
-    assert root_route._urls["/api/theme"][RequestMethod.GET](None) == b"aboba get"
+    assert root_route._urls["/api/theme"][RequestMethod.GET](None).payload == b"aboba get"
 
 
 def test_route_dispatch_request(get_request: Request) -> None:
     route = Route()
 
     @route.get("/")
-    def endpoint(*_: Request) -> bytes:
-        return b"aboba"
+    def endpoint(*_: Request) -> Response:
+        return Response(HttpStatus.HTTP_200_OK, b"aboba", "text/plain; charset=utf-8")
 
     res = route.dispatch_request(get_request)
-    assert res == b"aboba"
+    assert res.payload == b"aboba"

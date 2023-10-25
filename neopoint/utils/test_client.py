@@ -8,6 +8,10 @@ from neopoint.http.http_method import HttpMethod
 
 from .test_response import TestResponse
 
+__all__ = [
+    "TestClient",
+]
+
 
 class TestClient:
     __test__ = False  # For pytest.

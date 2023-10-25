@@ -1,8 +1,11 @@
 from typing import Any, Callable, Iterator, NoReturn, Self, TypeAlias
 
+from neopoint.http.http_status import HttpStatus
+from neopoint.http.response import Response
+
 from ..http import Request, RequestMethod
 
-EndpointCallable: TypeAlias = Callable[[Any], bytes]
+EndpointCallable: TypeAlias = Callable[[Any], Response]
 
 __all__ = ("Route",)
 
@@ -57,13 +60,18 @@ class Route:
             full_path = self._get_full_path(url_part)
             self._urls[full_path] = endpoints
 
-    def dispatch_request(self, req: Request) -> bytes:
+    def dispatch_request(self, req: Request) -> Response:
         if self._urls.get(req.path) is None:
-            return b"Not found 404 Error."
+            return Response(HttpStatus.HTTP_404_NOT_FOUND, b"", "")
         if self._urls[req.path].get(req.method) is None:
-            return b"This method is allowed."
+            return Response(HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR, b"", "")
 
-        return self._urls[req.path][req.method](req)
+        response = self._urls[req.path][req.method](req)
+
+        if not isinstance(response, Response):
+            raise TypeError(f"Response for '{req.path}' must be type of 'Response'.")
+
+        return response
 
 
 class RouteIterator(Iterator):

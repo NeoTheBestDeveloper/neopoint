@@ -7,7 +7,7 @@ import pytest
 from neopoint.http.request_method import RequestMethod
 from neopoint.wsgi import WSGIEnviron
 from neopoint.wsgi.exceptions import UnsupportedProtocol
-from neopoint.wsgi.wsgi_version import WsgiVersion
+from neopoint.wsgi.wsgi_version import WSGIVersion
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def default_environ() -> dict[str, Any]:
 
 def test_default_wsgi_environ(default_environ: dict[str, Any]) -> None:
     wsgi_environ = WSGIEnviron(default_environ)
-    assert wsgi_environ.wsgi_version == WsgiVersion(1, 0)
+    assert wsgi_environ.wsgi_version == WSGIVersion(1, 0)
     assert wsgi_environ.wsgi_url_scheme == "http"
     assert wsgi_environ.wsgi_input.read() == b""
     assert wsgi_environ.wsgi_errors.read() == ""

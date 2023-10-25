@@ -1,7 +1,9 @@
-import traceback
 from typing import Final, Iterable
 from wsgiref.simple_server import make_server
 from wsgiref.types import StartResponse, WSGIEnvironment
+
+from neopoint.http.http_status import HttpStatus
+from neopoint.http.response import Response
 
 from .http import Request
 from .routing import Route
@@ -21,9 +23,6 @@ class App:
         self._root_route = Route()
 
     def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
-        status = "200 OK"
-        headers = [(str("Content-type"), str("text/plain; charset=utf-8"))]
-
         try:
             wsgi_environ = WSGIEnviron(environ)
             request = Request(wsgi_environ)
@@ -31,12 +30,10 @@ class App:
 
         # pylint: disable=broad-exception-caught
         except Exception:
-            status = "500 Internal Server Error"
-            headers = [(str("Content-type"), str("text/plain; charset=utf-8"))]
-            response = str(traceback.format_exc()).encode("utf-8") if self._debug else b""
+            response = Response(HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR, b"", "")
 
-        start_response(status, headers)
-        return [response]
+        start_response(response.wsgi_normalized_status, response.wsgi_normalized_headers)
+        return [response.payload]
 
     def run(self, host: str, port: int) -> None:
         with make_server(host, port, self) as httpd:

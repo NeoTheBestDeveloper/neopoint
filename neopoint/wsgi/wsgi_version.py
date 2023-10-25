@@ -1,7 +1,7 @@
 from ..utils import Version
 
-__all__ = ("WsgiVersion",)
+__all__ = ("WSGIVersion",)
 
 
-class WsgiVersion(Version):
+class WSGIVersion(Version):
     ...
