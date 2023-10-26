@@ -25,7 +25,7 @@ def test_adding_endpoint_get():
 
     # pylint: disable=protected-access
     assert route._urls.get("/theme", None) is not None
-    assert route._urls["/theme"][RequestMethod.GET](None).payload == b"aboba"
+    assert route._urls["/theme"][RequestMethod.GET](None).content == b"aboba"
 
 
 def test_adding_endpoint_post():
@@ -37,7 +37,7 @@ def test_adding_endpoint_post():
 
     # pylint: disable=protected-access
     assert route._urls.get("/theme", None) is not None
-    assert route._urls["/theme"][RequestMethod.POST](None).payload == b"aboba"
+    assert route._urls["/theme"][RequestMethod.POST](None).content == b"aboba"
 
 
 def test_adding_endpoint_put():
@@ -49,7 +49,7 @@ def test_adding_endpoint_put():
 
     # pylint: disable=protected-access
     assert route._urls.get("/theme", None) is not None
-    assert route._urls["/theme"][RequestMethod.PUT](None).payload == b"aboba"
+    assert route._urls["/theme"][RequestMethod.PUT](None).content == b"aboba"
 
 
 def test_adding_endpoint_delete():
@@ -61,7 +61,7 @@ def test_adding_endpoint_delete():
 
     # pylint: disable=protected-access
     assert route._urls.get("/theme", None) is not None
-    assert route._urls["/theme"][RequestMethod.DELETE](None).payload == b"aboba"
+    assert route._urls["/theme"][RequestMethod.DELETE](None).content == b"aboba"
 
 
 def test_route_include():
@@ -81,11 +81,11 @@ def test_route_include():
 
     # pylint: disable=protected-access
     assert root_route._urls.get("/api/theme", None) is not None
-    assert root_route._urls["/api/theme"][RequestMethod.DELETE](None).payload == b"aboba delete"
+    assert root_route._urls["/api/theme"][RequestMethod.DELETE](None).content == b"aboba delete"
 
     # pylint: disable=protected-access
     assert root_route._urls.get("/api/theme", None) is not None
-    assert root_route._urls["/api/theme"][RequestMethod.GET](None).payload == b"aboba get"
+    assert root_route._urls["/api/theme"][RequestMethod.GET](None).content == b"aboba get"
 
 
 def test_route_dispatch_request(get_request: Request) -> None:
@@ -96,4 +96,4 @@ def test_route_dispatch_request(get_request: Request) -> None:
         return Response(HttpStatus.HTTP_200_OK, b"aboba", "text/plain; charset=utf-8")
 
     res = route.dispatch_request(get_request)
-    assert res.payload == b"aboba"
+    assert res.content == b"aboba"

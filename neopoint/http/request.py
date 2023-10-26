@@ -1,49 +1,46 @@
 import json
 from functools import cached_property
-from types import MappingProxyType
 from typing import Any
+
+from neopoint.http.message import Message
 
 from ..wsgi import WSGIEnviron
 from .request_method import RequestMethod
 
-__all__ = ("Request",)
+__all__ = [
+    "Request",
+]
 
 
 class RequestInvalidContentTypeError(Exception):
     ...
 
 
-class Request:
-    _header: MappingProxyType[str, Any]
+class Request(Message):
     _method: RequestMethod
-    _content_type: str
-    _content_length: int
     _path: str
-    _content: bytes
 
     def __init__(self, wsgi_environ: WSGIEnviron) -> None:
-        self._header = MappingProxyType(wsgi_environ.http_header)
         self._method = wsgi_environ.request_method
-        self._content_type = wsgi_environ.content_type
-        self._content_length = wsgi_environ.content_length
         self._path = wsgi_environ.path_info
-        self._content = wsgi_environ.wsgi_input.read(self.content_length)
+
+        super().__init__(
+            content=wsgi_environ.wsgi_input.read(wsgi_environ.content_length),
+            headers=wsgi_environ.http_header,
+            media_type=wsgi_environ.content_type,
+        )
 
     @property
-    def header(self) -> MappingProxyType[str, str]:
-        return self._header
+    def headers(self) -> MappingProxyType[str, str]:
+        return MappingProxyType(self._headers)
 
     @property
     def method(self) -> RequestMethod:
         return self._method
 
     @property
-    def content_type(self) -> str:
-        return self._content_type
-
-    @property
     def content_length(self) -> int:
-        return self._content_length
+        return len(self._content)
 
     @property
     def path(self) -> str:
@@ -51,8 +48,8 @@ class Request:
 
     @cached_property
     def json(self) -> dict[Any, Any]:
-        if self.content_type != "application/json":
+        if self.media_type != "application/json":
             raise RequestInvalidContentTypeError(
-                f"Error: trying get json from request which has non json content-type '{self.content_type}'\n"
+                f"Error: trying get json from request which has non json content-type '{self.media_type}'\n"
             )
         return json.loads(self._content)

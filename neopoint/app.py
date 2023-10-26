@@ -27,10 +27,12 @@ class App:
 
         # pylint: disable=broad-exception-caught
         except Exception:
-            response = Response(HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR, b"", "")
+            response = Response(HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        start_response(response.wsgi_normalized_status, response.wsgi_normalized_headers)
-        return [response.payload]
+        status = f"{response.status.status_code} {response.status.status_msg}"
+        start_response(status, [response.headers.items()])
+
+        return [response.content]
 
     def run(self, host: str, port: int) -> None:
         with make_server(host, port, self) as httpd:
