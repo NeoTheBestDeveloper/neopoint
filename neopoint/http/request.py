@@ -3,18 +3,14 @@ from functools import cached_property
 from types import MappingProxyType
 from typing import Any
 
-from neopoint.http.message import Message
-
 from ..wsgi import WSGIEnvironmentDTO
+from .exceptions import RequestInvalidContentTypeError
+from .message import Message
 from .request_method import RequestMethod
 
 __all__ = [
     "Request",
 ]
-
-
-class RequestInvalidContentTypeError(Exception):
-    ...
 
 
 class Request(Message):

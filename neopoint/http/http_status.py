@@ -1,5 +1,9 @@
 from enum import UNIQUE, IntEnum, verify
 
+__all__ = [
+    "HttpStatus",
+]
+
 
 @verify(UNIQUE)
 class HttpStatus(IntEnum):

@@ -1,7 +1,7 @@
 from typing import Any
 
-from neopoint.http.request import Request
-from neopoint.wsgi.wsgi_environ import WSGIEnvironmentDTO
+from neopoint.http import Request
+from neopoint.wsgi import WSGIEnvironmentDTO
 
 
 def test_get_request(default_environ: dict[str, Any]):

@@ -1,3 +1,5 @@
-from .route import Route
+from .router import Router
 
-__all__ = ("Route",)
+__all__ = [
+    "Router",
+]

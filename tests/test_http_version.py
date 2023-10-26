@@ -2,7 +2,8 @@ from dataclasses import astuple
 
 import pytest
 
-from neopoint.http import HttpVersion, InvalidHttpVersionError
+from neopoint.http import HttpVersion
+from neopoint.http.exceptions import InvalidHttpVersionError
 
 
 @pytest.mark.parametrize(

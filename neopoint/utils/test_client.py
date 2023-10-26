@@ -4,9 +4,7 @@ from sys import stderr
 from typing import Any, Callable, NoReturn
 from wsgiref.types import WSGIApplication, WSGIEnvironment
 
-from neopoint.http.http_method import HttpMethod
-from neopoint.http.http_status import HttpStatus
-from neopoint.http.response import Response
+from ..http import HttpMethod, HttpStatus, Response
 
 __all__ = [
     "TestClient",

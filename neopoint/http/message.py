@@ -1,12 +1,10 @@
 from typing import NoReturn
 
+from .exceptions import InvalidHeaderEncodingError
+
 __all__ = [
     "Message",
 ]
-
-
-class InvalidHeaderEncodingError(Exception):
-    ...
 
 
 class Message:

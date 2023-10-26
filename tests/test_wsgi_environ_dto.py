@@ -5,8 +5,9 @@ from wsgiref.types import WSGIEnvironment
 
 import pytest
 
-from neopoint.http.request_method import RequestMethod
-from neopoint.wsgi import UnsupportedProtocolError, WSGIEnvironmentDTO, WSGIVersion
+from neopoint.http import RequestMethod
+from neopoint.wsgi import WSGIEnvironmentDTO, WSGIVersion
+from neopoint.wsgi.exceptions import UnsupportedProtocolError
 
 
 def test_default_wsgi_environ(default_environ: WSGIEnvironment) -> None:

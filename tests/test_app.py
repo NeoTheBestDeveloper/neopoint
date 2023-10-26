@@ -4,27 +4,33 @@ from typing import Any
 import pytest
 
 from neopoint import App
-from neopoint.http.http_status import HttpStatus
-from neopoint.http.request import Request
-from neopoint.http.response import JsonResponse, Response, TextResponse
-from neopoint.routing.route import Route
-from neopoint.utils.test_client import TestClient
+from neopoint.http import HttpStatus, JsonResponse, Request, Response, TextResponse
+from neopoint.routing.router import Router
+from neopoint.utils import TestClient
 
 
 @pytest.fixture
 def app() -> App:
-    route = Route(prefix="/api")
+    router = Router(prefix="/api")
 
-    @route.get("/")
+    auth_router = Router(prefix="/auth")
+
+    @auth_router.get("/user")
+    def auth_user(*_: Request) -> Response:
+        return TextResponse("Authorise user.")
+
+    @router.get("/")
     def endpoint(*_: Any) -> Response:
         return TextResponse("Cool result.")
 
-    @route.post("/theme")
+    @router.post("/theme")
     def create_theme(req: Request) -> Response:
         return JsonResponse(req.json)
 
+    router.include_router(auth_router)
+
     app = App()
-    app.include_route(route)
+    app.include_router(router)
 
     return app
 
@@ -38,6 +44,13 @@ def test_app_run(client: TestClient) -> None:
     response = client.get("/api/?data=1&filter=category")
     assert response.status == HttpStatus(200)
     assert response.content == b"Cool result."
+    assert response.media_type == "text/plain"
+
+
+def test_get(client: TestClient) -> None:
+    response = client.get("/api/auth/user")
+    assert response.status == HttpStatus(200)
+    assert response.content == b"Authorise user."
     assert response.media_type == "text/plain"
 
 

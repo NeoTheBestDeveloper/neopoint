@@ -1,15 +1,11 @@
 from typing import NoReturn
 
-from ..utils import Version
+from ..common import Version
+from .exceptions import InvalidHttpVersionError
 
 __all__ = [
     "HttpVersion",
-    "InvalidHttpVersionError",
 ]
-
-
-class InvalidHttpVersionError(Exception):
-    ...
 
 
 class HttpVersion(Version):

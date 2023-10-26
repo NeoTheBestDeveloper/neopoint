@@ -1,6 +1,8 @@
 from enum import Enum
 
-__all__ = ("RequestMethod",)
+__all__ = [
+    "RequestMethod",
+]
 
 
 class RequestMethod(str, Enum):

@@ -3,10 +3,8 @@ from typing import Final, Iterable
 from wsgiref.simple_server import make_server
 from wsgiref.types import StartResponse, WSGIEnvironment
 
-from neopoint.http.response import TextResponse
-
-from .http import HttpStatus, Request
-from .routing import Route
+from .http import HttpStatus, Request, TextResponse
+from .routing import Router
 from .wsgi import WSGIEnvironmentDTO
 
 __all__ = [
@@ -17,15 +15,14 @@ __all__ = [
 class App:
     """App class which used as enter point for all library."""
 
-    _root_route: Route
+    _root_route: Router
     _debug: Final[bool]
 
     def __init__(self, debug: bool = False) -> None:
         self._debug = debug
-        self._root_route = Route()
+        self._root_route = Router()
 
     def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
-        print(environ)
         try:
             environ_dto = WSGIEnvironmentDTO(environ)
             request = Request(environ_dto)
@@ -45,5 +42,5 @@ class App:
         with make_server(host, port, self) as httpd:
             httpd.serve_forever()
 
-    def include_route(self, route: Route) -> None:
-        self._root_route.include_route(route)
+    def include_router(self, route: Router) -> None:
+        self._root_route.include_router(route)
