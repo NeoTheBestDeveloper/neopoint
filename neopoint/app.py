@@ -1,12 +1,17 @@
+import traceback
 from typing import Final, Iterable
 from wsgiref.simple_server import make_server
 from wsgiref.types import StartResponse, WSGIEnvironment
 
-from .http import HttpStatus, Request, Response
-from .routing import Route
-from .wsgi import WSGIEnviron
+from neopoint.http.response import TextResponse
 
-__all__ = ("App",)
+from .http import HttpStatus, Request
+from .routing import Route
+from .wsgi import WSGIEnvironmentDTO
+
+__all__ = [
+    "App",
+]
 
 
 class App:
@@ -20,17 +25,19 @@ class App:
         self._root_route = Route()
 
     def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
+        print(environ)
         try:
-            wsgi_environ = WSGIEnviron(environ)
-            request = Request(wsgi_environ)
+            environ_dto = WSGIEnvironmentDTO(environ)
+            request = Request(environ_dto)
             response = self._root_route.dispatch_request(request)
 
         # pylint: disable=broad-exception-caught
         except Exception:
-            response = Response(HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR)
+            response_text = str(traceback.format_exc()) if self._debug else ""
+            response = TextResponse(response_text, status=HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR)
 
         status = f"{response.status.status_code} {response.status.status_msg}"
-        start_response(status, [response.headers.items()])
+        start_response(status, list(response.headers.items()))
 
         return [response.content]
 

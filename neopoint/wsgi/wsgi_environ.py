@@ -6,17 +6,17 @@ from wsgiref.util import FileWrapper
 
 from ..http.http_version import HttpVersion
 from ..http.request_method import RequestMethod
-from .exceptions import UnsupportedProtocol
+from .exceptions import UnsupportedProtocolError
 from .wsgi_version import WSGIVersion
 
 __all__ = [
-    "WSGIEnviron",
+    "WSGIEnvironmentDTO",
 ]
 
 
 # pylint: disable=too-many-instance-attributes
 @dataclass(slots=True, frozen=True, match_args=False, init=False)
-class WSGIEnviron:
+class WSGIEnvironmentDTO:
     wsgi_version: WSGIVersion
     wsgi_url_scheme: Literal["http"] | Literal["https"]
     wsgi_input: BufferedReader
@@ -52,7 +52,9 @@ class WSGIEnviron:
         object.__setattr__(self, "wsgi_input_terminated", bool(environ.get("wsgi.input_terminated", False)))
 
         if self.wsgi_url_scheme not in ("http", "https"):
-            raise UnsupportedProtocol(f"Protocol '{self.wsgi_url_scheme}' does not supported.")
+            raise UnsupportedProtocolError(
+                f"Protocol '{self.wsgi_url_scheme}' does not supported. Only supported http or https protocols."
+            )
 
         # CGI keys.
         object.__setattr__(self, "request_method", RequestMethod(environ["REQUEST_METHOD"]))

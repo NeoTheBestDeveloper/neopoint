@@ -7,12 +7,12 @@ from neopoint.http.request import Request
 from neopoint.http.request_method import RequestMethod
 from neopoint.http.response import Response
 from neopoint.routing import Route
-from neopoint.wsgi.wsgi_environ import WSGIEnviron
+from neopoint.wsgi.wsgi_environ import WSGIEnvironmentDTO
 
 
 @pytest.fixture
 def get_request(default_environ: dict[str, Any]) -> Request:
-    wsgi_environ = WSGIEnviron(default_environ)
+    wsgi_environ = WSGIEnvironmentDTO(default_environ)
     return Request(wsgi_environ)
 
 

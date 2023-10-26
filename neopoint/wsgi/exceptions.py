@@ -1,5 +1,7 @@
-__all__ = ("UnsupportedProtocol",)
+__all__ = [
+    "UnsupportedProtocolError",
+]
 
 
-class UnsupportedProtocol(Exception):
+class UnsupportedProtocolError(Exception):
     """Raise if environ wsgi.url_schema is not 'http' or 'https'"""

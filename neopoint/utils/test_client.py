@@ -5,8 +5,8 @@ from typing import Any, Callable, NoReturn
 from wsgiref.types import WSGIApplication, WSGIEnvironment
 
 from neopoint.http.http_method import HttpMethod
-
-from .test_response import TestResponse
+from neopoint.http.http_status import HttpStatus
+from neopoint.http.response import Response
 
 __all__ = [
     "TestClient",
@@ -58,7 +58,7 @@ class TestClient:
 
         return environ
 
-    def _handle_request(self, environ: WSGIEnvironment) -> TestResponse | NoReturn:
+    def _handle_request(self, environ: WSGIEnvironment) -> Response | NoReturn:
         status_code: int | None = None
         response_headers = None
         exc_info = None
@@ -80,31 +80,38 @@ class TestClient:
         assert status_code is not None
         assert response_headers is not None
 
-        return TestResponse(
-            status_code=status_code,
+        headers = dict(response_headers)
+        media_type: str | None = None
+
+        if headers.get("Content-Type", None) is not None:
+            media_type = headers["Content-Type"].split(";")[0]
+
+        return Response(
+            status=HttpStatus(status_code),
             content=content,
-            headers=dict(response_headers),
+            headers=headers,
+            media_type=media_type,
         )
 
     def _json_to_bytes(self, json_payload: dict[str, Any]) -> bytes:
         return json.dumps(json_payload).encode()
 
-    def get(self, path: str) -> TestResponse:
+    def get(self, path: str) -> Response:
         current_environ = self._make_current_environ(path, HttpMethod.GET)
         return self._handle_request(current_environ)
 
-    def post(self, path: str, json_payload: dict[str, Any]) -> TestResponse:
+    def post(self, path: str, json_payload: dict[str, Any]) -> Response:
         bin_content = self._json_to_bytes(json_payload)
         current_environ = self._make_current_environ(path, HttpMethod.POST, bin_content)
 
         return self._handle_request(current_environ)
 
-    def put(self, path: str, json_payload: dict[str, Any]) -> TestResponse:
+    def put(self, path: str, json_payload: dict[str, Any]) -> Response:
         bin_content = self._json_to_bytes(json_payload)
         current_environ = self._make_current_environ(path, HttpMethod.PUT, bin_content)
 
         return self._handle_request(current_environ)
 
-    def delete(self, path: str) -> TestResponse:
+    def delete(self, path: str) -> Response:
         current_environ = self._make_current_environ(path, HttpMethod.DELETE)
         return self._handle_request(current_environ)
