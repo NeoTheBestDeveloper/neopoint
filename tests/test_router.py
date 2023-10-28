@@ -100,13 +100,12 @@ def test_router_include():
     assert root_router._urls[0]._controller(None).content == b"aboba auth"
 
     # pylint: disable=protected-access
-    print(*root_router.urls, sep="\n")
     assert root_router._find_url("/api/theme", RequestMethod.GET) != -1
     assert root_router._urls[1]._controller(None).content == b"aboba get"
 
     # pylint: disable=protected-access
-    # assert root_router._find_url("/api/theme", RequestMethod.DELETE) != -1
-    # assert root_router._urls[2]._controller(None).content == b"aboba delete"
+    assert root_router._find_url("/api/theme", RequestMethod.DELETE) != -1
+    assert root_router._urls[2]._controller(None).content == b"aboba delete"
 
 
 def test_route_dispatch_request(get_request: Request) -> None:

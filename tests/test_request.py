@@ -13,6 +13,7 @@ def test_get_request(default_environ: dict[str, Any]):
     assert req.path == wsgi_environ.path_info
     assert req.method == wsgi_environ.request_method
     assert req.headers == wsgi_environ.http_header.items().mapping
+    assert not req.query_params
 
 
 def test_post_request(post_json_environ: dict[str, Any]):

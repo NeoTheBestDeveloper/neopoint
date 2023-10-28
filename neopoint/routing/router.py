@@ -38,6 +38,8 @@ class Router:
             assert path.startswith("/"), "A path must start with '/'"
             assert not path.endswith("/"), "A path must not end with '/', as the routes will start with '/'"
 
+        path = "" if path == "/" else path
+
         def decorator(controller: Controller) -> None:
             full_path = self._get_full_path(path)
             url_idx = self._find_url(full_path, method)
@@ -51,6 +53,9 @@ class Router:
 
     def _get_full_path(self, path_part: str) -> str:
         return f"{self._prefix}{path_part}"
+
+    def _delete_redundant_slash(self, path: str) -> str:
+        return path if path[-1] != "/" else path[:-1]
 
     def get(self, path: str, *_) -> Callable[[Controller], None]:
         return self._append_endpoint(path, RequestMethod.GET)
@@ -70,8 +75,10 @@ class Router:
             self._urls.append(url)
 
     def dispatch_request(self, request: Request) -> Response:
+        path = self._delete_redundant_slash(request.path)
+
         for url in self._urls:
-            if url.match(request.path, request.method):
+            if url.match(path, request.method):
                 return url.controller(request)
         return TextResponse("Page not found.", status=HttpStatus.HTTP_404_NOT_FOUND)
 

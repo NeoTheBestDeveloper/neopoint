@@ -1,6 +1,7 @@
 __all__ = [
     "InvalidHeaderEncodingError",
     "InvalidHttpVersionError",
+    "InvalidQueryStringError",
     "RequestInvalidContentTypeError",
 ]
 
@@ -14,4 +15,8 @@ class InvalidHttpVersionError(Exception):
 
 
 class RequestInvalidContentTypeError(Exception):
+    ...
+
+
+class InvalidQueryStringError(Exception):
     ...

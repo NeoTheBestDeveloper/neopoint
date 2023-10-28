@@ -6,6 +6,7 @@ from typing import Any
 from ..wsgi import WSGIEnvironmentDTO
 from .exceptions import RequestInvalidContentTypeError
 from .message import Message
+from .query_params import QueryParams
 from .request_method import RequestMethod
 
 __all__ = [
@@ -16,10 +17,12 @@ __all__ = [
 class Request(Message):
     _method: RequestMethod
     _path: str
+    _query_params: QueryParams
 
     def __init__(self, wsgi_environ: WSGIEnvironmentDTO) -> None:
         self._method = wsgi_environ.request_method
         self._path = wsgi_environ.path_info
+        self._query_params = QueryParams(wsgi_environ.query_string)
 
         super().__init__(
             content=wsgi_environ.wsgi_input.read(wsgi_environ.content_length),
@@ -30,6 +33,10 @@ class Request(Message):
     @property
     def headers(self) -> MappingProxyType[str, str]:
         return MappingProxyType(self._headers)
+
+    @property
+    def query_params(self) -> QueryParams:
+        return self._query_params
 
     @property
     def method(self) -> RequestMethod:

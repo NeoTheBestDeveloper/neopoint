@@ -18,7 +18,7 @@ __all__ = [
 @dataclass(slots=True, frozen=True, match_args=False, init=False)
 class WSGIEnvironmentDTO:
     wsgi_version: WSGIVersion
-    wsgi_url_scheme: Literal["http"] | Literal["https"]
+    wsgi_url_scheme: Literal["http", "https"]
     wsgi_input: BufferedReader
     wsgi_errors: BufferedReader
     wsgi_multithread: bool
