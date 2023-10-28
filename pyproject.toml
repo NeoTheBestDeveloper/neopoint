@@ -72,6 +72,7 @@ disable = [
     "W0511",
     "C0103",
     "R0801",
+    "E0401"
 ]
 
 [tool.ruff]
@@ -84,3 +85,6 @@ line-length = 120
 
 [tool.isort]
 profile = "black"
+
+[tool.mypy]
+ignore_missing_imports = true

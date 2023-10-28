@@ -3,10 +3,6 @@ import pytest
 from neopoint.http.query_params import QueryParams
 
 
-def unordered_dict_cmp(obj1: dict, obj2: dict) -> bool:
-    return all(key in obj2 and obj1[key] == obj2[key] for key in obj1)
-
-
 @pytest.mark.parametrize(
     "query_string,dict_res",
     [

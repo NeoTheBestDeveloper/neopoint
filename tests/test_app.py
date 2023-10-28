@@ -60,3 +60,15 @@ def test_post(client: TestClient) -> None:
     assert response.status == HttpStatus(200)
     assert response.content == json.dumps(json_payload).encode()
     assert response.media_type == "application/json"
+
+
+def test_not_found_error(client: TestClient) -> None:
+    response = client.get("/some_fake_url")
+
+    assert response.status == HttpStatus.HTTP_404_NOT_FOUND
+
+
+def test_method_not_allowed_error(client: TestClient) -> None:
+    response = client.delete("/api/auth/user")
+
+    assert response.status == HttpStatus.HTTP_405_METHOD_NOT_ALLOWED

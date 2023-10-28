@@ -12,23 +12,38 @@ Controller: TypeAlias = Callable[[Any], Response]
 
 
 class Url:
-    _path: str
+    _path_re_pattern: re.Pattern
+    _path_pattern: str
     _method: RequestMethod
     _controller: Controller
 
-    def __init__(self, path: str, method: RequestMethod, controller: Controller) -> None:
+    def __init__(self, path_pattern: str, method: RequestMethod, controller: Controller) -> None:
         self._method = method
         self._controller = controller
-        self._path = path
+        self._path_re_pattern = self._get_re_pattern(path_pattern)
+        self._path_pattern = path_pattern
 
-    def match(self, path: str, method: RequestMethod) -> bool:
-        return re.match(f"^{self._path}$", path) is not None and self._method == method
+    def _get_re_pattern(self, path_pattern: str) -> re.Pattern:
+        while "{" in path_pattern and "}" in path_pattern:
+            reg_start = path_pattern.find("{")
+            reg_end = path_pattern.find("}") + 1
+
+            path_pattern = path_pattern[:reg_start] + r"(.+)" + path_pattern[reg_end:]
+
+        return re.compile(path_pattern)
+
+    def match_by_path(self, path: str) -> bool:
+        return self._path_re_pattern.fullmatch(path) is not None
+
+    def match_by_method(self, method: RequestMethod) -> bool:
+        return self._method == method
 
     def handle_request(self, request: Request) -> Response:
         return self._controller(request)
 
     def append_prefix(self, prefix: str) -> None:
-        self._path = prefix + self._path
+        self._path_pattern = prefix + self._path_pattern
+        self._path_re_pattern = re.compile(prefix + self._path_re_pattern.pattern)
 
     @property
     def controller(self) -> Controller:
@@ -39,8 +54,9 @@ class Url:
         return self._method
 
     @property
-    def path(self) -> str:
-        return self._path
+    def path_pattern(self) -> str:
+        return self._path_pattern
 
-    def __str__(self) -> str:
-        return f"Url(path={self._path}, method={self._method}, controller={self._controller})"
+    @property
+    def path_re_pattern(self) -> re.Pattern:
+        return self._path_re_pattern

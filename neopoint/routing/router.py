@@ -1,4 +1,4 @@
-from typing import Callable, Self
+from typing import Callable, NoReturn, Self
 
 from ..http import HttpStatus, Request, RequestMethod, Response, TextResponse
 from .exceptions import ControllerRedefinitionError
@@ -18,20 +18,25 @@ class Router:
         self._urls = []
 
     def _find_url(self, path: str, method: RequestMethod) -> int:
-        "Return positive index of found url, or -1."
+        "Return positive index of found url or -1 if matched only by url, -2 if no match."
 
+        matched_by_method = False
         for i, url in enumerate(self._urls):
-            if url.match(path, method):
-                return i
-        return -1
+            if url.match_by_path(path):
+                if url.match_by_method(method):
+                    return i
+                matched_by_method = True
 
-    def _append_url(self, url: Url) -> None:
-        url_idx = self._find_url(url.path, url.method)
+        return -1 if matched_by_method else -2
 
-        if url_idx != -1:
-            raise ControllerRedefinitionError(f"Controller {url.controller.__name__} already defined.")
+    def _append_url(self, url: Url) -> None | NoReturn:
+        url_idx = self._find_url(url.path_pattern, url.method)
+
+        if url_idx > -1:
+            raise ControllerRedefinitionError(f"Controller '{url.controller.__name__}' already defined.")
 
         self._urls.append(url)
+        return None
 
     def _append_endpoint(self, path: str, method: RequestMethod) -> Callable[[Controller], None]:
         if path not in ("/", ""):
@@ -44,7 +49,7 @@ class Router:
             full_path = self._get_full_path(path)
             url_idx = self._find_url(full_path, method)
 
-            if url_idx != -1:
+            if url_idx > -1:
                 raise ControllerRedefinitionError(f"Controller {controller.__name__} already defined.")
 
             self._urls.append(Url(full_path, method, controller))
@@ -77,10 +82,15 @@ class Router:
     def dispatch_request(self, request: Request) -> Response:
         path = self._delete_redundant_slash(request.path)
 
-        for url in self._urls:
-            if url.match(path, request.method):
-                return url.controller(request)
-        return TextResponse("Page not found.", status=HttpStatus.HTTP_404_NOT_FOUND)
+        idx = self._find_url(path, request.method)
+
+        if idx == -2:
+            return TextResponse("Page not found.", status=HttpStatus.HTTP_404_NOT_FOUND)
+
+        if idx == -1:
+            return TextResponse("This method is not allowed.", status=HttpStatus.HTTP_405_METHOD_NOT_ALLOWED)
+
+        return self._urls[idx].controller(request)
 
     @property
     def prefix(self) -> str:

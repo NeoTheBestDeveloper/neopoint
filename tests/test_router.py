@@ -96,15 +96,15 @@ def test_router_include():
     root_router.include_router(theme_router)
 
     # pylint: disable=protected-access
-    assert root_router._find_url("/api/auth", RequestMethod.POST) != -1
+    assert root_router._find_url("/api/auth", RequestMethod.POST) > -1
     assert root_router._urls[0]._controller(None).content == b"aboba auth"
 
     # pylint: disable=protected-access
-    assert root_router._find_url("/api/theme", RequestMethod.GET) != -1
+    assert root_router._find_url("/api/theme", RequestMethod.GET) > -1
     assert root_router._urls[1]._controller(None).content == b"aboba get"
 
     # pylint: disable=protected-access
-    assert root_router._find_url("/api/theme", RequestMethod.DELETE) != -1
+    assert root_router._find_url("/api/theme", RequestMethod.DELETE) > -1
     assert root_router._urls[2]._controller(None).content == b"aboba delete"
 
 
