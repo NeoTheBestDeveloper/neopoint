@@ -1,6 +1,6 @@
 from typing import Iterator, Mapping
 
-from .path_re import PathRe
+from .path_pattern import PathPattern
 
 __all__ = [
     "PathParams",
@@ -12,13 +12,13 @@ class PathParams(Mapping):
 
     _params: dict[str, str]
 
-    def __init__(self, requested_path: str, path_pattern: PathRe) -> None:
+    def __init__(self, requested_path: str, path_pattern: PathPattern) -> None:
         params_names = self._get_params_names(path_pattern)
         params = self._get_params(requested_path, path_pattern)
 
         self._params = dict(zip(params_names, params))
 
-    def _get_params_names(self, path_pattern: PathRe) -> tuple[str, ...]:
+    def _get_params_names(self, path_pattern: PathPattern) -> tuple[str, ...]:
         match_res = path_pattern.match(path_pattern.path_pattern)
 
         if match_res is None:
@@ -26,7 +26,7 @@ class PathParams(Mapping):
 
         return tuple(res.replace("{", "").replace("}", "") for res in match_res.groups())
 
-    def _get_params(self, requested_path: str, path_pattern: PathRe) -> tuple[str, ...]:
+    def _get_params(self, requested_path: str, path_pattern: PathPattern) -> tuple[str, ...]:
         match_res = path_pattern.match(requested_path)
         if match_res is None:
             return tuple()

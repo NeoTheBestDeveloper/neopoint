@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "neopoint"
-version = "0.1.0"
+version = "0.0.1"
 description = "Just a web framework for myself learning how they work."
 authors = ["NeoTheBestDeveloper <neothebestmain@protonmail.com>"]
 readme = "README.md"
