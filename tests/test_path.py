@@ -1,9 +1,9 @@
 import pytest
 
-from neopoint.routing.url import Url
+from neopoint.routing.path import Path
 
 
-class FakeUrl(Url):
+class FakePath(Path):
     # pylint: disable=super-init-not-called
     def __init__(self) -> None:
         ...
@@ -19,4 +19,4 @@ class FakeUrl(Url):
 )
 def test_path_pattern_to_re_parsing(path_pattern: str, re_pattern: str) -> None:
     # pylint: disable=protected-access
-    assert FakeUrl()._get_re_pattern(path_pattern).pattern == re_pattern
+    assert FakePath()._get_re_pattern(path_pattern).pattern == re_pattern

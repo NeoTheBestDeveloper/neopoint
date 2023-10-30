@@ -1,7 +1,6 @@
-import re
 from typing import Iterator, Mapping
 
-from neopoint.routing.url import Url
+from .path_re import PathRe
 
 __all__ = [
     "PathParams",
@@ -13,22 +12,22 @@ class PathParams(Mapping):
 
     _params: dict[str, str]
 
-    def __init__(self, requested_path: str, url: Url) -> None:
-        params_names = self._get_params_names(url.path_pattern, url.path_re_pattern)
-        params = self._get_params(requested_path, url.path_re_pattern)
+    def __init__(self, requested_path: str, path_pattern: PathRe) -> None:
+        params_names = self._get_params_names(path_pattern)
+        params = self._get_params(requested_path, path_pattern)
 
         self._params = dict(zip(params_names, params))
 
-    def _get_params_names(self, path_pattern: str, path_re_pattern: re.Pattern) -> tuple[str, ...]:
-        match_res = path_re_pattern.fullmatch(path_pattern)
+    def _get_params_names(self, path_pattern: PathRe) -> tuple[str, ...]:
+        match_res = path_pattern.match(path_pattern.path_pattern)
 
         if match_res is None:
             return tuple()
 
         return tuple(res.replace("{", "").replace("}", "") for res in match_res.groups())
 
-    def _get_params(self, requested_path: str, path_re_pattern: re.Pattern) -> tuple[str, ...]:
-        match_res = path_re_pattern.fullmatch(requested_path)
+    def _get_params(self, requested_path: str, path_pattern: PathRe) -> tuple[str, ...]:
+        match_res = path_pattern.match(requested_path)
         if match_res is None:
             return tuple()
 

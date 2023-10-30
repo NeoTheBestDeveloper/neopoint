@@ -6,6 +6,7 @@ from typing import Any
 from ..wsgi import WSGIEnvironmentDTO
 from .exceptions import RequestInvalidContentTypeError
 from .message import Message
+from .path_params import PathParams
 from .query_params import QueryParams
 from .request_method import RequestMethod
 
@@ -18,11 +19,13 @@ class Request(Message):
     _method: RequestMethod
     _path: str
     _query_params: QueryParams
+    _path_params: PathParams
 
-    def __init__(self, wsgi_environ: WSGIEnvironmentDTO) -> None:
-        self._method = wsgi_environ.request_method
-        self._path = wsgi_environ.path_info
+    def __init__(self, wsgi_environ: WSGIEnvironmentDTO, path_params: PathParams) -> None:
+        self._path = self._delete_redundant_slash(wsgi_environ.path_info)
         self._query_params = QueryParams(wsgi_environ.query_string)
+        self._method = wsgi_environ.request_method
+        self._path_params = path_params
 
         super().__init__(
             content=wsgi_environ.wsgi_input.read(wsgi_environ.content_length),
@@ -53,3 +56,6 @@ class Request(Message):
                 f"Error: trying get json from request which has non json content-type '{self.media_type}'\n"
             )
         return json.loads(self._content)
+
+    def _delete_redundant_slash(self, path: str) -> str:
+        return path if path[-1] != "/" else path[:-1]
