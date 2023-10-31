@@ -8,7 +8,7 @@ __all__ = [
 class PathPattern:
     """
     Hold information about path pattern, can match requested_path by given pattern.
-    Transform patern '/users/{user_id}/posts/{post_id}' into re pattern '/users/(.+)/posts/.+'.
+    Transform patern '/users/{user_id}/posts/{post_id}' into re pattern '/users/([^/]+)/posts/.+'.
 
     Attributes
     ----------
@@ -26,13 +26,13 @@ class PathPattern:
         self._re_pattern = self._get_re_pattern(syntax_pattern)
 
     def _get_re_pattern(self, syntax_pattern: str) -> re.Pattern:
-        """Replace substrings like '{some_path_param_name}' to '(.+)'."""
+        """Replace substrings like '{some_path_param_name}' to '([^/]+)'."""
 
         while "{" in syntax_pattern and "}" in syntax_pattern:
             reg_start = syntax_pattern.find("{")
             reg_end = syntax_pattern.find("}") + 1
 
-            syntax_pattern = syntax_pattern[:reg_start] + r"(.+)" + syntax_pattern[reg_end:]
+            syntax_pattern = syntax_pattern[:reg_start] + r"([^/]+)" + syntax_pattern[reg_end:]
 
         return re.compile(syntax_pattern)
 

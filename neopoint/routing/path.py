@@ -17,10 +17,10 @@ class Path:
     _method: RequestMethod
     _controller: Controller
 
-    def __init__(self, path_pattern: str, method: RequestMethod, controller: Controller) -> None:
+    def __init__(self, syntax_pattern: str, method: RequestMethod, controller: Controller) -> None:
         self._method = method
         self._controller = controller
-        self._pattern = PathPattern(path_pattern)
+        self._pattern = PathPattern(syntax_pattern)
 
     def match_by_path(self, path: str) -> bool:
         return self._pattern.match(path) is not None

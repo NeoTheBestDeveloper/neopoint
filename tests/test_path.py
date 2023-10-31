@@ -1,22 +1,54 @@
 import pytest
 
+from neopoint.http.request_method import RequestMethod
+from neopoint.http.response import TextResponse
 from neopoint.routing.path import Path
 
 
 class FakePath(Path):
-    # pylint: disable=super-init-not-called
-    def __init__(self) -> None:
-        ...
+    def __init__(self, path: str) -> None:
+        super().__init__(path, RequestMethod.GET, lambda *_: TextResponse(""))
 
 
 @pytest.mark.parametrize(
-    "path_pattern,re_pattern",
+    "syntax_pattern,requested_path",
     [
-        ("/users/{id}", r"/users/(.+)"),
-        ("/users/{user_id}/posts/{post_id}", r"/users/(.+)/posts/(.+)"),
-        ("/users/{role}/{id}", r"/users/(.+)/(.+)"),
+        (
+            "/users/{id}",
+            "/users/fsdfksj",
+        ),
+        (
+            "/users/{user_id}/posts/{post_id}",
+            "/users/423423/posts/fsf",
+        ),
+        (
+            "/users/{role}/{id}",
+            "/users/fadsfas/43242",
+        ),
     ],
 )
-def test_path_pattern_to_re_parsing(path_pattern: str, re_pattern: str) -> None:
-    # pylint: disable=protected-access
-    assert FakePath()._get_re_pattern(path_pattern).pattern == re_pattern
+def test_path_match_by_path(syntax_pattern: str, requested_path: str) -> None:
+    path = FakePath(syntax_pattern)
+    assert path.match_by_path(requested_path)
+
+
+@pytest.mark.parametrize(
+    "syntax_pattern,requested_path",
+    [
+        (
+            "/users/{id}",
+            "/users/fsdfksj/fs",
+        ),
+        (
+            "/users/{user_id}/posts/{post_id}",
+            "/users//posts/fsf",
+        ),
+        (
+            "/users/{role}/{id}",
+            "/users/fadsfas",
+        ),
+    ],
+)
+def test_path_dont_math_by_path(syntax_pattern: str, requested_path: str) -> None:
+    path = FakePath(syntax_pattern)
+    assert not path.match_by_path(requested_path)

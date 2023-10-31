@@ -22,7 +22,7 @@ def test_default_wsgi_environ(default_environ: WSGIEnvironment) -> None:
 
     assert wsgi_environ.request_method == RequestMethod.GET
     assert wsgi_environ.script_name == ""
-    assert wsgi_environ.path_info == "/"
+    assert wsgi_environ.path_info == ""
     assert wsgi_environ.query_string == ""
     assert wsgi_environ.content_type == ""
     assert wsgi_environ.content_length == 0
@@ -46,7 +46,7 @@ def test_post_json_wsgi_environ(post_json_environ: WSGIEnvironment, json_for_pos
 
     assert wsgi_environ.request_method == RequestMethod.POST
     assert wsgi_environ.script_name == ""
-    assert wsgi_environ.path_info == "/"
+    assert wsgi_environ.path_info == ""
     assert wsgi_environ.query_string == ""
     assert wsgi_environ.content_type == "application/json"
     assert wsgi_environ.content_length == len(content)

@@ -24,4 +24,4 @@ class FakePath(Path):
     ],
 )
 def test_path_params_parsing(path: FakePath, requested_path: str, dict_res: dict[str, str]) -> None:
-    assert dict(PathParams(requested_path, path.path_pattern)) == dict_res
+    assert dict(PathParams(requested_path, path.pattern)) == dict_res

@@ -51,7 +51,7 @@ class App:
             return TextResponse("This method is not allowed.", status=HttpStatus.HTTP_405_METHOD_NOT_ALLOWED)
 
         path = self._root_route.pathes[path_idx]
-        path_params = PathParams(environ_dto.path_info, path.path_pattern)
+        path_params = PathParams(environ_dto.path_info, path.pattern)
         request = Request(environ_dto, path_params)
 
         return path.controller(request)

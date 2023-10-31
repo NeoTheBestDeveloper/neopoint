@@ -31,7 +31,7 @@ class Router:
         return -1 if matched_by_method else -2
 
     def _append_path(self, path: Path) -> None | NoReturn:
-        path_idx = self.find_path(path.path_pattern.path_pattern, path.method)
+        path_idx = self.find_path(path.pattern.syntax_pattern, path.method)
 
         if path_idx > -1:
             raise ControllerRedefinitionError(f"Controller '{path.controller.__name__}' already defined.")

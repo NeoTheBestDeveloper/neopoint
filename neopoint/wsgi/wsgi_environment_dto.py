@@ -59,7 +59,7 @@ class WSGIEnvironmentDTO:
         # CGI keys.
         object.__setattr__(self, "request_method", RequestMethod(environ["REQUEST_METHOD"]))
         object.__setattr__(self, "script_name", environ["SCRIPT_NAME"])
-        object.__setattr__(self, "path_info", environ["PATH_INFO"])
+        object.__setattr__(self, "path_info", self._delete_redundant_slash(environ["PATH_INFO"]))
         object.__setattr__(self, "query_string", environ.get("QUERY_STRING", ""))
         object.__setattr__(self, "content_type", environ.get("CONTENT_TYPE", ""))
         object.__setattr__(self, "content_length", int(environ.get("CONTENT_LENGTH", 0) or 0))
@@ -76,3 +76,6 @@ class WSGIEnvironmentDTO:
                 http_header[new_key] = value
 
         object.__setattr__(self, "http_header", http_header)
+
+    def _delete_redundant_slash(self, path: str) -> str:
+        return path if path[-1] != "/" else path[:-1]
