@@ -46,16 +46,17 @@ class Router:
 
         path = "" if path == "/" else path
 
-        def decorator(controller: Controller) -> None:
+        def controller_wrapper(controller: Controller) -> None:
             full_path = self._get_full_path(path)
             path_idx = self.find_path(full_path, method)
 
             if path_idx > -1:
                 raise ControllerRedefinitionError(f"Controller {controller.__name__} already defined.")
 
-            self._pathes.append(Path(full_path, method, controller))
+            new_path = Path(full_path, method, controller)
+            self._append_path(new_path)
 
-        return decorator
+        return controller_wrapper
 
     def _get_full_path(self, path_part: str) -> str:
         return f"{self._prefix}{path_part}"
@@ -75,7 +76,7 @@ class Router:
     def include_router(self, other: Self) -> None:
         for path in other.pathes:
             path.append_prefix(self._prefix)
-            self._pathes.append(path)
+            self._append_path(path)
 
     @property
     def prefix(self) -> str:
