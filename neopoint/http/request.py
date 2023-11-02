@@ -42,6 +42,10 @@ class Request(Message):
         return self._query_params
 
     @property
+    def path_params(self) -> PathParams:
+        return self._path_params
+
+    @property
     def method(self) -> RequestMethod:
         return self._method
 

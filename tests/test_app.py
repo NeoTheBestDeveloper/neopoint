@@ -1,5 +1,4 @@
 import json
-from typing import Any
 
 import pytest
 
@@ -16,20 +15,31 @@ def app() -> App:
     auth_router = Router(prefix="/auth")
 
     @auth_router.get("/user")
-    def auth_user(*_: Request) -> Response:
+    # pylint: disable=unused-argument
+    def auth_user(request: Request) -> Response:
         return TextResponse("Authorise user.")
 
     @router.get("/")
-    def endpoint(*_: Any) -> Response:
+    # pylint: disable=unused-argument
+    def endpoint(request: Request) -> Response:
         return TextResponse("Cool result.")
 
     @router.post("/theme")
     def create_theme(req: Request) -> Response:
         return JsonResponse(req.json)
 
+    @router.get("/users/{user_id}")
+    def get_user(user_id: int) -> Response:
+        return JsonResponse({"id": user_id})
+
+    @router.get("/broken_url")
+    # pylint: disable=unused-argument
+    def broken_controller(request: Request, user_id: int) -> Response:
+        return JsonResponse({"status": "response from broken endpoint"})
+
     router.include_router(auth_router)
 
-    app = App()
+    app = App(debug=True)
     app.include_router(router)
 
     return app
@@ -42,6 +52,7 @@ def client(app: App) -> TestClient:
 
 def test_app_run(client: TestClient) -> None:
     response = client.get("/api/?data=1&filter=category")
+    print(response.content.decode())
     assert response.status == HttpStatus(200)
     assert response.content == b"Cool result."
     assert response.media_type == "text/plain"
@@ -72,3 +83,17 @@ def test_method_not_allowed_error(client: TestClient) -> None:
     response = client.delete("/api/auth/user")
 
     assert response.status == HttpStatus.HTTP_405_METHOD_NOT_ALLOWED
+
+
+def test_path_params_parsing(client: TestClient) -> None:
+    response = client.get("/api/users/31245")
+    json_response = {"id": 31245}
+
+    assert response.content == json.dumps(json_response).encode()
+
+
+def test_broken_controller(client: TestClient) -> None:
+    response = client.get("/api/broken_url")
+
+    assert "ControllerArgumentsParsingError" in response.content.decode()
+    assert response.status == HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR

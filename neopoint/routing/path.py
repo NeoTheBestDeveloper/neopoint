@@ -1,4 +1,4 @@
-from typing import Any, Callable, TypeAlias
+from typing import Callable, TypeAlias
 
 from neopoint.http.path_pattern import PathPattern
 from neopoint.http.request_method import RequestMethod
@@ -9,7 +9,7 @@ __all__ = [
     "Path",
 ]
 
-Controller: TypeAlias = Callable[[Any], Response]
+Controller: TypeAlias = Callable[..., Response]
 
 
 class Path:

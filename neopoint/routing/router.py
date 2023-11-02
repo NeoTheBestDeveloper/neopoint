@@ -23,6 +23,7 @@ class Router:
 
         matched_by_method = False
         for i, path in enumerate(self._pathes):
+            print(path.pattern.syntax_pattern, searched_path)
             if path.match_by_path(searched_path):
                 if path.match_by_method(method):
                     return i
