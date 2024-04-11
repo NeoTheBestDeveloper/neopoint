@@ -1,14 +1,90 @@
 [tool.poetry]
 name = "neopoint"
-version = "0.1.0"
-description = ""
+version = "0.0.1"
+description = "Just a web framework for myself learning how they work."
 authors = ["NeoTheBestDeveloper <neothebestmain@protonmail.com>"]
 readme = "README.md"
+license = "MIT"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Web Environment",
+    "Framework :: Neopoint",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3",
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: WSGI",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Typing :: Typed",
+
+]
+keywords = ["web", "framework", "HTTP"]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.10,<=3.12"
 
+
+[tool.poetry.group.dev.dependencies]
+isort = "^5.12.0"
+pylint = "^2.17.4"
+black = "^23.7.0"
+ruff = "^0.0.278"
+pyright = "^1.1.317"
+mypy = "^1.4.1"
+commitizen = "^3.5.2"
+pre-commit = "^3.3.3"
+gunicorn = "^20.1.0"
+requests = "^2.31.0"
+types-requests = "^2.31.0.1"
+pytest-randomly = "^3.13.0"
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+
+[tool.poetry.group.ci.dependencies]
+tox = "^4.6.4"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "pep440"
+version_provider = "poetry"
+major_version_zero = true
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pylint]
+max-line-length = 120
+disable = [
+    "missing-class-docstring",
+    "missing-function-docstring",
+    "missing-module-docstring",
+    "too-few-public-methods",
+    "cyclic-import",
+    "unspecified-encoding",
+    "redefined-outer-name",
+    "useless-return",
+    "W0511",
+    "C0103",
+    "R0801",
+    "E0401"
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.black]
+color = true
+line-length = 120
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+ignore_missing_imports = true
