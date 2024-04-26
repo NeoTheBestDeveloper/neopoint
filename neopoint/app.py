@@ -30,7 +30,6 @@ class App:
         self._root_route = Router()
 
     def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
-        print(environ)
         try:
             environ_dto = WSGIEnvironmentDTO(environ)
             response = self._handle_request(environ_dto)
