@@ -5,6 +5,7 @@ from wsgiref.types import StartResponse, WSGIEnvironment
 
 from neopoint.http.http_status import HttpStatus
 from neopoint.http.path_params import PathParams
+from neopoint.http.query_params import QueryParams
 from neopoint.http.request import Request
 from neopoint.http.response import Response, TextResponse
 from neopoint.routing.path import Controller
@@ -76,13 +77,22 @@ class App:
         res: dict[str, Any] = {}
 
         for name, type_ in args_annotations.items():
-            res[name] = type_(path_params[name])
+            if name in path_params:
+                res[name] = type_(path_params[name])
+
+        return res
+
+    def _parse_query_params(self, args_annotations: dict[str, Any], query_params: QueryParams) -> dict[str, Any]:
+        res: dict[str, Any] = {}
+
+        for name, type_ in args_annotations.items():
+            if name in query_params:
+                res[name] = type_(query_params[name])
 
         return res
 
     def _call_controller(self, request: Request, controller: Controller) -> Response | NoReturn:
         annotations = controller.__annotations__
-        # return_annotation = self._get_return_annotation(annotations)
         args_annotations = self._get_args_annotations(annotations)
 
         if self._has_request_annotation(args_annotations):
@@ -94,8 +104,9 @@ class App:
             )
 
         path_params = self._parse_path_params(args_annotations, request.path_params)
+        query_params = self._parse_query_params(args_annotations, request.query_params)
 
-        return controller(**path_params)
+        return controller(**path_params, **query_params)
 
     def run(self, host: str, port: int) -> None:
         with make_server(host, port, self) as httpd:

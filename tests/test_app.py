@@ -32,6 +32,29 @@ def app() -> App:
     def get_user(user_id: int) -> Response:
         return JsonResponse({"id": user_id})
 
+    @router.get("/users")
+    def get_users_list(sort: str, length: int) -> Response:
+        return JsonResponse(
+            {
+                "sort": sort,
+                "length": length,
+            }
+        )
+
+    @router.get("/users/{user_id}/themes")
+    def get_user_themes(
+        user_id: int,
+        limit: int,
+        sort: str,
+    ) -> Response:
+        return JsonResponse(
+            {
+                "id": user_id,
+                "limit": limit,
+                "sort": sort,
+            }
+        )
+
     @router.get("/broken_url")
     # pylint: disable=unused-argument
     def broken_controller(request: Request, user_id: int) -> Response:
@@ -52,7 +75,6 @@ def client(app: App) -> TestClient:
 
 def test_app_run(client: TestClient) -> None:
     response = client.get("/api/?data=1&filter=category")
-    print(response.content.decode())
     assert response.status == HttpStatus(200)
     assert response.content == b"Cool result."
     assert response.media_type == "text/plain"
@@ -97,3 +119,19 @@ def test_broken_controller(client: TestClient) -> None:
 
     assert "ControllerArgumentsParsingError" in response.content.decode()
     assert response.status == HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR
+
+
+def test_query_params_parsing(client: TestClient) -> None:
+    response = client.get("/api/users?sort=desc&length=10")
+    json_response = {"sort": "desc", "length": 10}
+    assert response.content == json.dumps(json_response).encode()
+
+
+def test_parse_query_and_path_params(client: TestClient) -> None:
+    response = client.get("/api/users/43242/themes?sort=desc&limit=10")
+    json_response = {
+        "id": 43242,
+        "limit": 10,
+        "sort": "desc",
+    }
+    assert response.content == json.dumps(json_response).encode()
