@@ -93,7 +93,6 @@ class App:
 
     def _call_controller(self, request: Request, controller: Controller) -> Response | NoReturn:
         annotations = controller.__annotations__
-        # return_annotation = self._get_return_annotation(annotations)
         args_annotations = self._get_args_annotations(annotations)
 
         if self._has_request_annotation(args_annotations):
