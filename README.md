@@ -10,11 +10,10 @@ Neopoint is a simple backend framework, which support routing, parsing query and
 
 ```python
 from neopoint import App
-from neopoint.routing.router import Router
+from neopoint.routing import Router
+
 
 router = Router(prefix="/api")
-
-router.include_router(auth_router)
 
 app = App(debug=True)
 app.include_router(router)
@@ -35,6 +34,7 @@ def get_user_by_id(user_id: int) -> JsonResponse:
     )
 ```
 
+
 You can add pattern at endpoint path like {NAME_OF_PARAMETR} and it will be passed to your controller function.
 
 ### Let's parse also query parametrs.
@@ -43,7 +43,7 @@ You can add pattern at endpoint path like {NAME_OF_PARAMETR} and it will be pass
 from neopoint.http import JsonResponse
 
 @router.get("/users")
-def get_users(limit: int, sort: str) -> JsonResponse:
+def get_users(limit: int = 15, sort: str = "ASC") -> JsonResponse:
     return JsonResponse(
         {
             "id": user_id,
@@ -70,3 +70,4 @@ Request attributes:
 - method -> RequestMethod
 - path -> str
 - json -> Any
+- content -> bytes

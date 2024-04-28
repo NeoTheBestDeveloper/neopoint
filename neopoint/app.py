@@ -3,11 +3,12 @@ from typing import Any, Final, Iterable, NoReturn
 from wsgiref.simple_server import make_server
 from wsgiref.types import StartResponse, WSGIEnvironment
 
+from neopoint.http.exceptions import ValidationError
 from neopoint.http.http_status import HttpStatus
 from neopoint.http.path_params import PathParams
 from neopoint.http.query_params import QueryParams
 from neopoint.http.request import Request
-from neopoint.http.response import Response, TextResponse
+from neopoint.http.response import JsonResponse, Response, TextResponse
 from neopoint.routing.path import Controller
 
 from .exceptions import ControllerArgumentsParsingError
@@ -35,8 +36,10 @@ class App:
             response = self._handle_request(environ_dto)
 
         # pylint: disable=broad-exception-caught
+        except ValidationError as e:
+            response = JsonResponse({"detail": e.msg}, status=e.status)
         except Exception:
-            response_text = str(traceback.format_exc()) if self._debug else ""
+            response_text = str(traceback.format_exc()) if self._debug else "Internal server error."
             response = TextResponse(response_text, status=HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR)
 
         status = f"{response.status.status_code} {response.status.status_msg}"
@@ -48,10 +51,12 @@ class App:
         path_idx = self._root_route.find_path(environ_dto.path_info, environ_dto.request_method)
 
         if path_idx == -2:
-            return TextResponse("Page not found.", status=HttpStatus.HTTP_404_NOT_FOUND)
+            return JsonResponse({"detail": "Not found."}, status=HttpStatus.HTTP_404_NOT_FOUND)
 
         if path_idx == -1:
-            return TextResponse("This method is not allowed.", status=HttpStatus.HTTP_405_METHOD_NOT_ALLOWED)
+            return JsonResponse(
+                {"detail": "This method is not allowed."}, status=HttpStatus.HTTP_405_METHOD_NOT_ALLOWED
+            )
 
         path = self._root_route.pathes[path_idx]
         path_params = PathParams(environ_dto.path_info, path.pattern)
@@ -94,6 +99,7 @@ class App:
     def _call_controller(self, request: Request, controller: Controller) -> Response | NoReturn:
         annotations = controller.__annotations__
         args_annotations = self._get_args_annotations(annotations)
+        defaults = () if controller.__defaults__ is None else controller.__defaults__
 
         if self._has_request_annotation(args_annotations):
             if len(args_annotations) == 1:
@@ -102,6 +108,13 @@ class App:
                 "Only one argument must be for controller if you using 'low-level syntax' (Request annotation). "
                 f"Controller name={controller.__name__}"
             )
+
+        query_annotations = {}
+        for arg in args_annotations:
+            if arg not in request.path_params:
+                query_annotations[arg] = args_annotations[arg]
+
+        request.query_params.validate_types(query_annotations, defaults)
 
         path_params = self._parse_path_params(args_annotations, request.path_params)
         query_params = self._parse_query_params(args_annotations, request.query_params)

@@ -1,7 +1,11 @@
 import re
-from typing import Iterator, Mapping
+from typing import Any, Iterator, Mapping, NoReturn
 
-from .exceptions import InvalidQueryStringError
+from .exceptions import (
+    InvalidQueryStringError,
+    InvalidTypeForQueryParamError,
+    MissedRequiredQueryParamError,
+)
 
 __all__ = [
     "QueryParams",
@@ -37,7 +41,7 @@ DECODE_TABLE: dict[str, str] = {
 
 class QueryParams(Mapping):
     _params: dict[str, str | list[str]]
-    _pair_pattern: re.Pattern = re.compile(r"\w+=\w+")
+    _pair_pattern: re.Pattern = re.compile(r"\w+=[\w\"']+")
 
     def __init__(self, query_string: str) -> None:
         self._params = {}
@@ -45,11 +49,24 @@ class QueryParams(Mapping):
         if not query_string:
             return
 
+        query_string = self._decode_query_string(query_string)
+
         if not self._validate_query_string(query_string):
             raise InvalidQueryStringError(f"Ivalid query string {query_string}.")
 
-        query_string = self._decode_query_string(query_string)
         self._parse_query_string(query_string)
+
+    def validate_types(self, annotations: dict[str, Any], defaults: tuple[Any, ...]) -> None | NoReturn:
+        for idx, name in enumerate(reversed(annotations)):
+            if self._params.get(name, None) is None and len(defaults) <= idx:
+                raise MissedRequiredQueryParamError(name)
+            try:
+                if self._params.get(name, None) is not None:
+                    annotations[name](self._params[name])
+            except ValueError:
+                raise InvalidTypeForQueryParamError(name, annotations[name], type(self._params[name]))
+
+        return None
 
     def _decode_query_string(self, query_string: str) -> str:
         for decoded, encoded in DECODE_TABLE.items():
