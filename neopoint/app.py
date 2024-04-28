@@ -1,5 +1,5 @@
 import traceback
-from typing import Any, Final, Iterable, NoReturn
+from typing import Any, Callable, Final, Iterable, NoReturn
 from wsgiref.simple_server import make_server
 from wsgiref.types import StartResponse, WSGIEnvironment
 
@@ -29,6 +29,25 @@ class App:
     def __init__(self, debug: bool = False) -> None:
         self._debug = debug
         self._root_route = Router()
+
+    def run(self, host: str, port: int) -> None:
+        with make_server(host, port, self) as httpd:
+            httpd.serve_forever()
+
+    def include_router(self, route: Router) -> None:
+        self._root_route.include_router(route)
+
+    def get(self, path: str, *_) -> Callable[[Controller], None]:
+        return self._root_route.get(path)
+
+    def post(self, path: str, *_) -> Callable[[Controller], None]:
+        return self._root_route.post(path)
+
+    def put(self, path: str, *_) -> Callable[[Controller], None]:
+        return self._root_route.put(path)
+
+    def delete(self, path: str, *_) -> Callable[[Controller], None]:
+        return self._root_route.delete(path)
 
     def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
         try:
@@ -120,10 +139,3 @@ class App:
         query_params = self._parse_query_params(args_annotations, request.query_params)
 
         return controller(**path_params, **query_params)
-
-    def run(self, host: str, port: int) -> None:
-        with make_server(host, port, self) as httpd:
-            httpd.serve_forever()
-
-    def include_router(self, route: Router) -> None:
-        self._root_route.include_router(route)

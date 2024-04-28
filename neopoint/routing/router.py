@@ -30,37 +30,6 @@ class Router:
 
         return -1 if matched_by_method else -2
 
-    def _append_path(self, path: Path) -> None | NoReturn:
-        path_idx = self.find_path(path.pattern.syntax_pattern, path.method)
-
-        if path_idx > -1:
-            raise ControllerRedefinitionError(f"Controller '{path.controller.__name__}' already defined.")
-
-        self._pathes.append(path)
-        return None
-
-    def _append_endpoint(self, path: str, method: RequestMethod) -> Callable[[Controller], None]:
-        if path not in ("/", ""):
-            assert path.startswith("/"), "A path must start with '/'"
-            assert not path.endswith("/"), "A path must not end with '/', as the routes will start with '/'"
-
-        path = "" if path == "/" else path
-
-        def controller_wrapper(controller: Controller) -> None:
-            full_path = self._get_full_path(path)
-            path_idx = self.find_path(full_path, method)
-
-            if path_idx > -1:
-                raise ControllerRedefinitionError(f"Controller {controller.__name__} already defined.")
-
-            new_path = Path(full_path, method, controller)
-            self._append_path(new_path)
-
-        return controller_wrapper
-
-    def _get_full_path(self, path_part: str) -> str:
-        return f"{self._prefix}{path_part}"
-
     def get(self, path: str, *_) -> Callable[[Controller], None]:
         return self._append_endpoint(path, RequestMethod.GET)
 
@@ -85,3 +54,34 @@ class Router:
     @property
     def pathes(self) -> list[Path]:
         return self._pathes.copy()
+
+    def _append_endpoint(self, path: str, method: RequestMethod) -> Callable[[Controller], None]:
+        if path not in ("/", ""):
+            assert path.startswith("/"), "A path must start with '/'"
+            assert not path.endswith("/"), "A path must not end with '/', as the routes will start with '/'"
+
+        path = "" if path == "/" else path
+
+        def controller_wrapper(controller: Controller) -> None:
+            full_path = self._get_full_path(path)
+            path_idx = self.find_path(full_path, method)
+
+            if path_idx > -1:
+                raise ControllerRedefinitionError(f"Controller {controller.__name__} already defined.")
+
+            new_path = Path(full_path, method, controller)
+            self._append_path(new_path)
+
+        return controller_wrapper
+
+    def _append_path(self, path: Path) -> None | NoReturn:
+        path_idx = self.find_path(path.pattern.syntax_pattern, path.method)
+
+        if path_idx > -1:
+            raise ControllerRedefinitionError(f"Controller '{path.controller.__name__}' already defined.")
+
+        self._pathes.append(path)
+        return None
+
+    def _get_full_path(self, path_part: str) -> str:
+        return f"{self._prefix}{path_part}"
