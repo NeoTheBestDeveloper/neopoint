@@ -48,7 +48,7 @@ class App:
         path_idx = self._root_route.find_path(environ_dto.path_info, environ_dto.request_method)
 
         if path_idx == -2:
-            return TextResponse("Page not found.", status=HttpStatus.HTTP_404_NOT_FOUND)
+            return TextResponse("Страница не найдена.", status=HttpStatus.HTTP_404_NOT_FOUND)
 
         if path_idx == -1:
             return TextResponse("This method is not allowed.", status=HttpStatus.HTTP_405_METHOD_NOT_ALLOWED)
